@@ -23,4 +23,4 @@ echo "=============================="
 echo "All deployments complete!"
 echo ""
 echo "Checking pod status..."
-kubectl get pods -l app.kubernetes.io/part-of=certprep -n default
+kubectl get pods -n default | grep -E "prep-(web|db)"

@@ -31,4 +31,5 @@ kubectl apply -k "$OVERLAY_PATH"
 
 echo ""
 echo "Deployment complete. Checking status..."
-kubectl get pods -l app.kubernetes.io/name="$SITE" -n default
+kubectl get pods -l app="${SITE}-web" -n default
+kubectl get pods -l app="${SITE}-db" -n default
