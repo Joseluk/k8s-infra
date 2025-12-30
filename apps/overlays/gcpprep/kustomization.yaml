@@ -7,12 +7,7 @@ namePrefix: gcpprep-
 resources:
   - ../../base
 
-labels:
-  app.kubernetes.io/name: gcpprep
-  app.kubernetes.io/part-of: certprep
-
 patches:
-  # Web deployment patches
   - target:
       kind: Deployment
       name: web
@@ -35,8 +30,6 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/env/2/value
         value: GCP Prep
-
-  # Web service patches
   - target:
       kind: Service
       name: web
@@ -44,8 +37,6 @@ patches:
       - op: replace
         path: /spec/selector/app
         value: gcpprep-web
-
-  # Ingress patches
   - target:
       kind: Ingress
       name: ingress
@@ -59,8 +50,6 @@ patches:
       - op: replace
         path: /spec/rules/0/host
         value: gcpprep.dev.jgcloud.es
-
-  # DB deployment patches
   - target:
       kind: Deployment
       name: db
@@ -80,8 +69,6 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/env/2/value
         value: gcpprep
-
-  # DB service patches
   - target:
       kind: Service
       name: db
