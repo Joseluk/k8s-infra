@@ -7,7 +7,7 @@ namePrefix: devopsprep-
 resources:
   - ../../base
 
-commonLabels:
+labels:
   app.kubernetes.io/name: devopsprep
   app.kubernetes.io/part-of: certprep
 

@@ -7,7 +7,7 @@ namePrefix: scrumprep-
 resources:
   - ../../base
 
-commonLabels:
+labels:
   app.kubernetes.io/name: scrumprep
   app.kubernetes.io/part-of: certprep
 

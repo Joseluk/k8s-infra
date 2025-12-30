@@ -7,7 +7,7 @@ namePrefix: awsprep-
 resources:
   - ../../base
 
-commonLabels:
+labels:
   app.kubernetes.io/name: awsprep
   app.kubernetes.io/part-of: certprep
 

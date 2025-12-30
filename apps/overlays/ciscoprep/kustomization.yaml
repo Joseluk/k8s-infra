@@ -7,7 +7,7 @@ namePrefix: ciscoprep-
 resources:
   - ../../base
 
-commonLabels:
+labels:
   app.kubernetes.io/name: ciscoprep
   app.kubernetes.io/part-of: certprep
 

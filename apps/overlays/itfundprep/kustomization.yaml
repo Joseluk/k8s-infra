@@ -7,7 +7,7 @@ namePrefix: itfundprep-
 resources:
   - ../../base
 
-commonLabels:
+labels:
   app.kubernetes.io/name: itfundprep
   app.kubernetes.io/part-of: certprep
 

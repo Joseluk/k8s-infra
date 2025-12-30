@@ -7,7 +7,7 @@ namePrefix: comptiprep-
 resources:
   - ../../base
 
-commonLabels:
+labels:
   app.kubernetes.io/name: comptiprep
   app.kubernetes.io/part-of: certprep
 
