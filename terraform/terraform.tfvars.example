@@ -1,0 +1,7 @@
+# Copiar a terraform.tfvars y modificar
+email = "tu-email@ejemplo.com"  # Email para Let's Encrypt
+
+# Opcional
+# domain = "tudominio.com"
+# enable_ingress_nginx = true
+# enable_cert_manager = true

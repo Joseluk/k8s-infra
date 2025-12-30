@@ -1,0 +1,91 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+namePrefix: pmpprep-
+
+resources:
+  - ../../base
+
+commonLabels:
+  app.kubernetes.io/name: pmpprep
+  app.kubernetes.io/part-of: certprep
+
+patches:
+  # Web deployment patches
+  - target:
+      kind: Deployment
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: pmpprep-web
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: pmpprep-web
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: pmpprep:latest
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: postgresql://pmpprep:pmppreppass@pmpprep-db:5432/pmpprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: pmpprep2024
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: PMP Prep
+
+  # Web service patches
+  - target:
+      kind: Service
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: pmpprep-web
+
+  # Ingress patches
+  - target:
+      kind: Ingress
+      name: ingress
+    patch: |
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: pmpprep.dev.jgcloud.es
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: pmpprep-tls
+      - op: replace
+        path: /spec/rules/0/host
+        value: pmpprep.dev.jgcloud.es
+
+  # DB deployment patches
+  - target:
+      kind: Deployment
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: pmpprep-db
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: pmpprep-db
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: pmpprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: pmppreppass
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: pmpprep
+
+  # DB service patches
+  - target:
+      kind: Service
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: pmpprep-db

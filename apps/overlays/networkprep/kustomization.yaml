@@ -1,0 +1,91 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+namePrefix: networkprep-
+
+resources:
+  - ../../base
+
+commonLabels:
+  app.kubernetes.io/name: networkprep
+  app.kubernetes.io/part-of: certprep
+
+patches:
+  # Web deployment patches
+  - target:
+      kind: Deployment
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: networkprep-web
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: networkprep-web
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: networkprep:latest
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: postgresql://networkprep:networkpreppass@networkprep-db:5432/networkprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: networkprep2024
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: Network Prep
+
+  # Web service patches
+  - target:
+      kind: Service
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: networkprep-web
+
+  # Ingress patches
+  - target:
+      kind: Ingress
+      name: ingress
+    patch: |
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: networkprep.dev.jgcloud.es
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: networkprep-tls
+      - op: replace
+        path: /spec/rules/0/host
+        value: networkprep.dev.jgcloud.es
+
+  # DB deployment patches
+  - target:
+      kind: Deployment
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: networkprep-db
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: networkprep-db
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: networkprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: networkpreppass
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: networkprep
+
+  # DB service patches
+  - target:
+      kind: Service
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: networkprep-db

@@ -1,0 +1,91 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+namePrefix: devopsprep-
+
+resources:
+  - ../../base
+
+commonLabels:
+  app.kubernetes.io/name: devopsprep
+  app.kubernetes.io/part-of: certprep
+
+patches:
+  # Web deployment patches
+  - target:
+      kind: Deployment
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: devopsprep-web
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: devopsprep-web
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: devopsprep:latest
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: postgresql://devopsprep:devopspreppass@devopsprep-db:5432/devopsprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: devopsprep2024
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: DevOps Prep
+
+  # Web service patches
+  - target:
+      kind: Service
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: devopsprep-web
+
+  # Ingress patches
+  - target:
+      kind: Ingress
+      name: ingress
+    patch: |
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: devopsprep.dev.jgcloud.es
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: devopsprep-tls
+      - op: replace
+        path: /spec/rules/0/host
+        value: devopsprep.dev.jgcloud.es
+
+  # DB deployment patches
+  - target:
+      kind: Deployment
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: devopsprep-db
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: devopsprep-db
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: devopsprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: devopspreppass
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: devopsprep
+
+  # DB service patches
+  - target:
+      kind: Service
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: devopsprep-db

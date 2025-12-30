@@ -1,0 +1,91 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+namePrefix: ciscoprep-
+
+resources:
+  - ../../base
+
+commonLabels:
+  app.kubernetes.io/name: ciscoprep
+  app.kubernetes.io/part-of: certprep
+
+patches:
+  # Web deployment patches
+  - target:
+      kind: Deployment
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: ciscoprep-web
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: ciscoprep-web
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: ciscoprep:latest
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: postgresql://ciscoprep:ciscopreppass@ciscoprep-db:5432/ciscoprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: ciscoprep2024
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: Cisco Prep
+
+  # Web service patches
+  - target:
+      kind: Service
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: ciscoprep-web
+
+  # Ingress patches
+  - target:
+      kind: Ingress
+      name: ingress
+    patch: |
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: ciscoprep.dev.jgcloud.es
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: ciscoprep-tls
+      - op: replace
+        path: /spec/rules/0/host
+        value: ciscoprep.dev.jgcloud.es
+
+  # DB deployment patches
+  - target:
+      kind: Deployment
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: ciscoprep-db
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: ciscoprep-db
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: ciscoprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: ciscopreppass
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: ciscoprep
+
+  # DB service patches
+  - target:
+      kind: Service
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: ciscoprep-db

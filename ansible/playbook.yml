@@ -1,0 +1,19 @@
+---
+- name: Setup k3s bare-metal cluster
+  hosts: localhost
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: k3s
+      tags: [k3s]
+
+  post_tasks:
+    - name: Verify k3s is running
+      command: kubectl get nodes
+      register: nodes_output
+      changed_when: false
+
+    - name: Show cluster nodes
+      debug:
+        var: nodes_output.stdout_lines

@@ -1,0 +1,58 @@
+---
+- name: Check if k3s is already installed
+  stat:
+    path: /usr/local/bin/k3s
+  register: k3s_binary
+
+- name: Install k3s
+  when: not k3s_binary.stat.exists
+  block:
+    - name: Download k3s install script
+      get_url:
+        url: "{{ k3s_install_url }}"
+        dest: /tmp/k3s-install.sh
+        mode: '0755'
+
+    - name: Run k3s installer
+      environment:
+        INSTALL_K3S_VERSION: "{{ k3s_version }}"
+        INSTALL_K3S_EXEC: "{{ k3s_server_args }}"
+      command: /tmp/k3s-install.sh
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait for k3s to be ready
+      command: kubectl wait --for=condition=Ready nodes --all --timeout=120s
+      retries: 3
+      delay: 10
+      register: result
+      until: result.rc == 0
+
+- name: Ensure k3s service is running
+  systemd:
+    name: k3s
+    state: started
+    enabled: true
+
+- name: Create .kube directory for admin user
+  file:
+    path: /home/admin/.kube
+    state: directory
+    owner: admin
+    group: admin
+    mode: '0755'
+
+- name: Copy kubeconfig to admin user
+  copy:
+    src: "{{ kubeconfig_path }}"
+    dest: /home/admin/.kube/config
+    remote_src: true
+    owner: admin
+    group: admin
+    mode: '0600'
+
+- name: Set KUBECONFIG in admin bashrc
+  lineinfile:
+    path: /home/admin/.bashrc
+    line: 'export KUBECONFIG=/home/admin/.kube/config'
+    state: present

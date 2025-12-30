@@ -1,0 +1,91 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+namePrefix: scrumprep-
+
+resources:
+  - ../../base
+
+commonLabels:
+  app.kubernetes.io/name: scrumprep
+  app.kubernetes.io/part-of: certprep
+
+patches:
+  # Web deployment patches
+  - target:
+      kind: Deployment
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: scrumprep-web
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: scrumprep-web
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: scrumprep:latest
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: postgresql://scrumprep:scrumpreppass@scrumprep-db:5432/scrumprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: scrumprep2024
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: Scrum Prep
+
+  # Web service patches
+  - target:
+      kind: Service
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: scrumprep-web
+
+  # Ingress patches
+  - target:
+      kind: Ingress
+      name: ingress
+    patch: |
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: scrumprep.dev.jgcloud.es
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: scrumprep-tls
+      - op: replace
+        path: /spec/rules/0/host
+        value: scrumprep.dev.jgcloud.es
+
+  # DB deployment patches
+  - target:
+      kind: Deployment
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: scrumprep-db
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: scrumprep-db
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: scrumprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: scrumpreppass
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: scrumprep
+
+  # DB service patches
+  - target:
+      kind: Service
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: scrumprep-db

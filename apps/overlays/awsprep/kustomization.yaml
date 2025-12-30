@@ -1,0 +1,91 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+namePrefix: awsprep-
+
+resources:
+  - ../../base
+
+commonLabels:
+  app.kubernetes.io/name: awsprep
+  app.kubernetes.io/part-of: certprep
+
+patches:
+  # Web deployment patches
+  - target:
+      kind: Deployment
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: awsprep-web
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: awsprep-web
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: awsprep:latest
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: postgresql://awsprep:awspreppass@awsprep-db:5432/awsprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: awsprep2024
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: AWS Prep
+
+  # Web service patches
+  - target:
+      kind: Service
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: awsprep-web
+
+  # Ingress patches
+  - target:
+      kind: Ingress
+      name: ingress
+    patch: |
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: awsprep.dev.jgcloud.es
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: awsprep-tls
+      - op: replace
+        path: /spec/rules/0/host
+        value: awsprep.dev.jgcloud.es
+
+  # DB deployment patches
+  - target:
+      kind: Deployment
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: awsprep-db
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: awsprep-db
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: awsprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: awspreppass
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: awsprep
+
+  # DB service patches
+  - target:
+      kind: Service
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: awsprep-db

@@ -1,0 +1,91 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: default
+namePrefix: securityprep-
+
+resources:
+  - ../../base
+
+commonLabels:
+  app.kubernetes.io/name: securityprep
+  app.kubernetes.io/part-of: certprep
+
+patches:
+  # Web deployment patches
+  - target:
+      kind: Deployment
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: securityprep-web
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: securityprep-web
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: securityprep:latest
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: postgresql://securityprep:securitypreppass@securityprep-db:5432/securityprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: securityprep2024
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: Security Prep
+
+  # Web service patches
+  - target:
+      kind: Service
+      name: web
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: securityprep-web
+
+  # Ingress patches
+  - target:
+      kind: Ingress
+      name: ingress
+    patch: |
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: securityprep.dev.jgcloud.es
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: securityprep-tls
+      - op: replace
+        path: /spec/rules/0/host
+        value: securityprep.dev.jgcloud.es
+
+  # DB deployment patches
+  - target:
+      kind: Deployment
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/matchLabels/app
+        value: securityprep-db
+      - op: replace
+        path: /spec/template/metadata/labels/app
+        value: securityprep-db
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: securityprep
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: securitypreppass
+      - op: replace
+        path: /spec/template/spec/containers/0/env/2/value
+        value: securityprep
+
+  # DB service patches
+  - target:
+      kind: Service
+      name: db
+    patch: |
+      - op: replace
+        path: /spec/selector/app
+        value: securityprep-db
